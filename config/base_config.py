@@ -27,8 +27,8 @@ class base_config:
     warmup_steps: int = 5
 
     # FSDP
-    use_orig_params: bool = True
-    limit_all_gathers: bool = True
+    use_orig_params: bool = False
+    limit_all_gathers: bool = False
 
     # DDP
     use_ddp: bool = False
@@ -71,11 +71,11 @@ class base_config:
     ap_use_kahan_summation: bool = False
 
     # sharding policy
-    sharding_strategy: ShardingStrategy = ShardingStrategy.FULL_SHARD
+    sharding_strategy: ShardingStrategy = ShardingStrategy.SHARD_GRAD_OP
     print_sharding_plan: bool = False
 
     run_profiler: bool = False
-    profile_folder: str = "fsdp_no_ac/profile_tracing"
+    profile_folder: str = "trace"
 
     # disable forward_prefetch since it currently doesn't work with activation
     # checkpointing for several cases
@@ -88,7 +88,7 @@ class base_config:
     num_workers_dataloader: int = 2
 
     # training
-    batch_size_training: int = 32
+    batch_size_training: int = 4
 
     # activation checkpointing
     fsdp_activation_checkpointing: bool = True
@@ -98,7 +98,7 @@ class base_config:
     use_parallel_attention: bool = False
 
     # validation
-    run_validation: bool = True
+    run_validation: bool = False
     val_batch_size = 24
 
     # logging
@@ -111,8 +111,7 @@ class base_config:
     # backward_prefetch = None
 
     use_non_recursive_wrapping: bool = False
-    backward_prefetch = BackwardPrefetch.BACKWARD_PRE
-
+    backward_prefetch = None #BackwardPrefetch.BACKWARD_PRE
 
 def get_policy_base(blocks):
     cfg = base_config()

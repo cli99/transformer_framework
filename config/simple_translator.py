@@ -75,7 +75,7 @@ def apply_fsdp_checkpointing(model, blocks):
     )
 
 def start_fsdp(model, local_rank):
-    # a translation function that reads the config file and implements those fsdp settings 
+    # a translation function that reads the config file and implements those fsdp settings
     # into supplied model, returns model
 
     cfg = cfg_fsdp()
@@ -90,8 +90,8 @@ def start_fsdp(model, local_rank):
                 print(f"BFloat16 mixed precision activated")
         else:
             if local_rank==0:
-                print(f"WARNING: Mixed Precision requested in config, but BFloat not available...using FP32")    
-    
+                print(f"WARNING: Mixed Precision requested in config, but BFloat not available...using FP32")
+
     # if not using mixed precision, turn on TF32 for matmul?
     if not cfg.use_mixed_precision and cfg.use_tf32:
         torch.backends.cuda.matmul.allow_tf32 = True
@@ -100,7 +100,7 @@ def start_fsdp(model, local_rank):
 
     # get wrapping policy
     current_layer_class = cfg.transformer_layer_class
-    
+
     #if local_rank==0:
     print(f"wrapping model using the layer class {current_layer_class}")
 
@@ -118,11 +118,10 @@ def start_fsdp(model, local_rank):
         forward_prefetch=cfg.forward_prefetch,
         # run_with_synch=True,
     )
-    
-    
+
+
     # apply checkpointing
     if cfg.use_fsdp_activation_checkpointing:
         apply_fsdp_checkpointing(model, current_layer_class)
 
     return model
- 

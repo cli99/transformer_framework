@@ -173,11 +173,16 @@ def zero_print(rank, x):
 
 
 # ------ main code loop -----------------
-def fsdp_main():
+def fsdp_main(args):
     """main process,  within each rank process"""
 
     cfg = config.train_config()  # loads from defaults
-
+    if args.profile:
+        cfg.run_profiler = True
+    if args.batch_size_training:
+        cfg.batch_size_training = args.batch_size_training
+    if args.profile_folder:
+        cfg.profile_folder = args.profile_folder
     # torchrun specific
     local_rank = int(os.environ["LOCAL_RANK"])
     rank = int(os.environ["RANK"])
@@ -902,8 +907,21 @@ def parse_args():
         "--model",
         default="deepvit",
         metavar="string",
-        choices=["deepvit", "t5", "regnet", "vitbase", "vitsmart"],
+        choices=["deepvit", "t5", "regnet", "vitbase", "vitsmart", "gpt2"],
         help="choose model to run, available: `deepvit`, `t5`, `regnet`, `vitbase`, 'vitsmart' (default: vitbase)",
+    )
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--batch_size_training",
+        type=int,
+        default=64,
+    )
+    parser.add_argument(
+        "--profile_folder",
+        default="trace",
     )
     args = parser.parse_args()
     return args
@@ -912,11 +930,13 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     print(f"******* loading model {args.model=}")
-    assert args.model in ["deepvit", "t5", "regnet", "vitbase", "vitsmart"]
+    assert args.model in ["deepvit", "t5", "gpt2", "regnet", "vitbase", "vitsmart"]
     if args.model == "deepvit":
         import config.deepvit_config as config
     elif args.model == "t5":
         import config.t5_config as config
+    elif args.model == "gpt2":
+        import config.gpt2_config as config
     elif args.model == "regnet":
         import config.regnet_config as config
     elif args.model == "vitbase":
@@ -924,4 +944,4 @@ if __name__ == "__main__":
     elif args.model == "vitsmart":
         import config.vit_smart_config as config
 
-    fsdp_main()
+    fsdp_main(args)
